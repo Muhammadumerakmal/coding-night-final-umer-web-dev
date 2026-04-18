@@ -19,7 +19,7 @@ export default function Dashboard() {
 
   const fetchItems = useCallback(async () => {
     try {
-      const { data } = await api.get('/items');
+      const { data } = await api.get('items');
       setItems(data);
     } catch (err) {
       console.error('Failed to fetch items', err);
@@ -40,9 +40,9 @@ export default function Dashboard() {
     e.preventDefault();
     try {
       if (editingId) {
-        await api.put(`/items/${editingId}`, { title, description });
+        await api.put(`items/${editingId}`, { title, description });
       } else {
-        await api.post('/items', { title, description });
+        await api.post('items', { title, description });
       }
       setTitle('');
       setDescription('');
@@ -61,7 +61,7 @@ export default function Dashboard() {
 
   const handleDelete = async (id: string) => {
     try {
-      await api.delete(`/items/${id}`);
+      await api.delete(`items/${id}`);
       fetchItems();
     } catch (err) {
       console.error('Failed to delete item', err);

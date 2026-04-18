@@ -15,16 +15,33 @@ export default function AuthPage() {
     e.preventDefault();
     setError('');
     try {
-      const endpoint = isLogin ? '/auth/login' : '/auth/register';
+      const endpoint = isLogin ? 'auth/login' : 'auth/register';
+      console.log(`Sending ${isLogin ? 'Login' : 'Registration'} request to: ${endpoint}`);
+      
       const { data } = await api.post(endpoint, formData);
+      console.log('API Response Success:', data);
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       router.push('/dashboard');
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || 'Something went wrong');
+        console.error('API Error Response:', err.response?.data);
+        const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Something went wrong';
+        
+        // Specific handling based on status codes if needed
+        if (err.response?.status === 409) {
+          setError('This email is already registered. Please login instead.');
+        } else if (err.response?.status === 400) {
+          setError(errorMessage);
+        } else if (err.response?.status === 500) {
+          setError('Server error. Please try again later.');
+        } else {
+          setError(errorMessage);
+        }
       } else {
-        setError('An unexpected error occurred');
+        console.error('Unexpected Error:', err);
+        setError('An unexpected error occurred. Please check your connection.');
       }
     }
   };

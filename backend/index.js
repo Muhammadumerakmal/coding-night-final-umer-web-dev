@@ -66,8 +66,10 @@ app.use('/api/items', itemRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: err.message || 'Something went wrong!' });
+  console.error('Unhandled Error:', err);
+  res.status(500).json({ 
+    error: process.env.NODE_ENV === 'production' ? 'Something went wrong!' : err.message 
+  });
 });
 
 app.listen(PORT, () => {
