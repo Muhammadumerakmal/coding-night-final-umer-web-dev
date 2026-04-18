@@ -33,6 +33,7 @@ if (!JWT_SECRET && process.env.NODE_ENV !== 'production') {
 const allowedOrigins = [
   'http://localhost:3000',
   'https://coding-night-final-umer.vercel.app',
+  'https://coding-night-final-umer-web-dev.vercel.app',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
