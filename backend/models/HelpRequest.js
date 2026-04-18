@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
-const itemSchema = new mongoose.Schema({
+const helpRequestSchema = new mongoose.Schema({
+  requester: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   title: {
     type: String,
     required: true,
@@ -23,18 +28,29 @@ const itemSchema = new mongoose.Schema({
     enum: ['Open', 'In Progress', 'Completed', 'Closed'],
     default: 'Open',
   },
+  helper: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   aiMetadata: {
     tags: {
       type: [String],
       default: [],
     },
+    insights: {
+      type: String,
+    },
+    autoCategory: {
+      type: String,
+    },
+    autoUrgency: {
+      type: String,
+    },
   },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+  completedAt: {
+    type: Date,
   },
 }, { timestamps: true });
 
-const Item = mongoose.model('Item', itemSchema);
-export default Item;
+const HelpRequest = mongoose.model('HelpRequest', helpRequestSchema);
+export default HelpRequest;
