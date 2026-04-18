@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import api from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
 import axios from "axios";
+import Link from "next/link";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -49,150 +50,149 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
-      {/* Background glow */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[30%] w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[20%] w-[500px] h-[500px] bg-cyan-600/8 rounded-full blur-[120px]" />
-      </div>
-
-      <div className="relative w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <span className="text-3xl font-extrabold bg-gradient-to-r from-violet-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-            Helplytics AI
-          </span>
-          <p className="mt-1.5 text-white/40 text-sm">
-            AI-Powered Community Support Platform
-          </p>
+    <div className="min-h-screen flex flex-col">
+      {/* Navbar Minimal */}
+      <nav className="w-full z-10 px-6 py-6 max-w-[1400px] mx-auto flex items-center justify-between pointer-events-none">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded bg-teal-600 flex flex-col items-center justify-center text-white font-bold text-lg">
+            H
+          </div>
+          <span className="font-bold text-[#18181b] text-lg">HelpHub AI</span>
         </div>
+        
+        <div className="hidden md:flex items-center gap-6">
+          <Link href="/" className="text-neutral-600 text-sm font-medium pointer-events-auto">Home</Link>
+          <Link href="/explore" className="text-neutral-600 text-sm font-medium pointer-events-auto">Explore</Link>
+          <Link href="/leaderboard" className="text-neutral-600 text-sm font-medium pointer-events-auto">Leaderboard</Link>
+        </div>
+      </nav>
 
-        {/* Card */}
-        <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-8">
-          {/* Tab Toggle */}
-          <div className="flex rounded-xl bg-white/[0.04] border border-white/8 p-1 mb-7">
-            <button
-              id="tab-login"
-              onClick={() => {
-                setIsLogin(true);
-                setError("");
-              }}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${isLogin ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"}`}
-            >
-              Sign In
-            </button>
-            <button
-              id="tab-signup"
-              onClick={() => {
-                setIsLogin(false);
-                setError("");
-              }}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${!isLogin ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"}`}
-            >
-              Create Account
-            </button>
-          </div>
-
-          <div className="mb-5">
-            <h2 className="text-lg font-bold text-white">
-              {isLogin ? "Welcome back 👋" : "Join the community ✦"}
-            </h2>
-            <p className="text-white/40 text-sm mt-0.5">
-              {isLogin
-                ? "Sign in to your Helplytics account."
-                : "Create your free account and start helping or getting help."}
-            </p>
-          </div>
-
-          {error && (
-            <div className="mb-4 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
-              {error}
+      {/* Auth Content block */}
+      <div className="flex-1 flex items-center justify-center p-6 -mt-16">
+        <div className="flex flex-col lg:flex-row w-full max-w-5xl items-stretch gap-6 lg:gap-0">
+          
+          {/* Left Block */}
+          <div className="lg:w-1/2 bg-[#1A2421] p-12 lg:p-14 lg:rounded-l-[2.5rem] lg:rounded-r-none rounded-[2rem] shadow-xl relative overflow-hidden flex flex-col justify-center">
+            <div className="text-teal-400 text-[11px] font-bold tracking-widest uppercase mb-6">
+              COMMUNITY ACCESS
             </div>
-          )}
+            
+            <h1 className="text-[3rem] font-bold text-white leading-[1.1] tracking-tight mb-6">
+              Enter the support network.
+            </h1>
+            
+            <p className="text-neutral-300 text-[15px] leading-relaxed mb-8 pr-4">
+              Create an account or login below. Jump into a multi-page product flow designed for asking, offering, and tracking help with a premium interface.
+            </p>
+            
+            <ul className="space-y-4 text-neutral-300 text-[14px]">
+              <li className="flex items-start gap-3">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span>
+                <span>Role-based entry for Need Help, Can Help, or Both</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span>
+                <span>Direct path into dashboard, requests, AI Center, and community feed</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span>
+                <span>Persistent session powered by secure tokens.</span>
+              </li>
+            </ul>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <label className="block text-xs text-white/50 mb-1.5">
-                  Username
-                </label>
-                <input
-                  id="input-username"
-                  type="text"
-                  placeholder="e.g. devguru_sam"
-                  className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-violet-500/60 transition-colors"
-                  value={formData.username}
-                  onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
-                  }
-                  required
-                />
+          {/* Right Block */}
+          <div className="lg:w-1/2 bg-white p-12 lg:p-14 lg:rounded-r-[2.5rem] lg:rounded-l-none rounded-[2rem] shadow-xl border border-black/5 flex flex-col justify-center">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="text-teal-700 text-[11px] font-bold tracking-widest uppercase">
+                {isLogin ? "LOGIN / SIGNUP" : "SIGNUP / LOGIN"}
+              </span>
+            </div>
+            
+            <h2 className="text-[2.25rem] font-bold text-[#18181b] leading-tight tracking-tight mb-8">
+              Authenticate your community profile
+            </h2>
+
+            {/* Toggle tabs */}
+            <div className="flex bg-neutral-100 rounded-lg p-1 mb-6">
+              <button
+                onClick={() => { setIsLogin(true); setError(""); }}
+                className={`flex-1 py-1.5 text-sm font-semibold rounded-md transition-all ${isLogin ? 'bg-white text-[#18181b] shadow-sm' : 'text-neutral-500'}`}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { setIsLogin(false); setError(""); }}
+                 className={`flex-1 py-1.5 text-sm font-semibold rounded-md transition-all ${!isLogin ? 'bg-white text-[#18181b] shadow-sm' : 'text-neutral-500'}`}
+              >
+                Register
+              </button>
+            </div>
+
+            {error && (
+              <div className="mb-6 rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+                {error}
               </div>
             )}
-            <div>
-              <label className="block text-xs text-white/50 mb-1.5">
-                Email address
-              </label>
-              <input
-                id="input-email"
-                type="email"
-                placeholder="you@example.com"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-violet-500/60 transition-colors"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-white/50 mb-1.5">
-                Password
-              </label>
-              <input
-                id="input-password"
-                type="password"
-                placeholder="••••••••"
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-violet-500/60 transition-colors"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                required
-              />
-            </div>
 
-            <button
-              id="auth-submit-btn"
-              type="submit"
-              disabled={loading}
-              className="w-full mt-2 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-                  {isLogin ? "Signing in…" : "Creating account…"}
-                </>
-              ) : isLogin ? (
-                "Sign In →"
-              ) : (
-                "Create Account →"
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {!isLogin && (
+                <div>
+                  <label className="block text-[#18181b] text-[13px] font-semibold mb-2">
+                    Select Username
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm text-[#18181b] outline-none focus:border-teal-500 transition-colors"
+                    required
+                  />
+                </div>
               )}
-            </button>
-          </form>
 
-          {!isLogin && (
-            <p className="text-center text-xs text-white/30 mt-4">
-              By creating an account you agree to our Terms of Service and
-              Privacy Policy.
-            </p>
-          )}
+              <div className="flex flex-col sm:flex-row gap-5">
+                <div className="flex-1">
+                  <label className="block text-[#18181b] text-[13px] font-semibold mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm text-[#18181b] outline-none focus:border-teal-500 transition-colors"
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-[#18181b] text-[13px] font-semibold mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full bg-white border border-neutral-200 rounded-xl px-4 py-3 text-sm text-[#18181b] outline-none focus:border-teal-500 transition-colors"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-4 py-3.5 rounded-full bg-teal-600 text-white text-[15px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-teal-700 transition-colors flex items-center justify-center shadow-sm"
+              >
+                {loading ? (
+                  <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                ) : (
+                  "Continue to dashboard"
+                )}
+              </button>
+            </form>
+          </div>
+
         </div>
-
-        {/* Footer note */}
-        <p className="text-center text-xs text-white/20 mt-6">
-          Helplytics AI · Community Support, reimagined.
-        </p>
       </div>
     </div>
   );
