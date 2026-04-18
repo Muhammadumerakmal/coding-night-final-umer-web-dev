@@ -52,7 +52,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navbar Minimal */}
-      <nav className="w-full z-10 px-6 py-6 max-w-[1400px] mx-auto flex items-center justify-between pointer-events-none">
+      <nav className="w-full z-10 px-6 py-6 max-w-[1400px] mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded bg-teal-600 flex flex-col items-center justify-center text-white font-bold text-lg">
             H
@@ -61,9 +61,9 @@ export default function AuthPage() {
         </div>
         
         <div className="hidden md:flex items-center gap-6">
-          <Link href="/" className="text-neutral-600 text-sm font-medium pointer-events-auto">Home</Link>
-          <Link href="/explore" className="text-neutral-600 text-sm font-medium pointer-events-auto">Explore</Link>
-          <Link href="/leaderboard" className="text-neutral-600 text-sm font-medium pointer-events-auto">Leaderboard</Link>
+          <Link href="/" className="text-neutral-600 text-sm font-medium">Home</Link>
+          <Link href="/explore" className="text-neutral-600 text-sm font-medium">Explore</Link>
+          <Link href="/leaderboard" className="text-neutral-600 text-sm font-medium">Leaderboard</Link>
         </div>
       </nav>
 
