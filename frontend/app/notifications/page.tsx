@@ -2,43 +2,68 @@
 
 import Link from 'next/link';
 
+const notifications = [
+  { title: '"Need help" was marked as solved', category: 'Status', time: 'Just now', read: false },
+  { title: 'Ayesha Khan offered help on "Need help"', category: 'Match', time: 'Just now', read: false },
+  { title: 'Your request "Need help" is now live in the community feed', category: 'Request', time: 'Just now', read: false },
+  { title: '"Need help making my portfolio responsive before demo day" was marked as solved', category: 'Status', time: 'Just now', read: false },
+  { title: '"Need help making my portfolio responsive before demo day" was marked as solved', category: 'Status', time: 'Just now', read: false },
+  { title: '"Need help making my portfolio responsive before demo day" was marked as solved', category: 'Status', time: 'Just now', read: false },
+  { title: 'New helper matched to your responsive portfolio request', category: 'Match', time: '12 min ago', read: false },
+  { title: 'Your trust score increased after a solved request', category: 'Reputation', time: '1 hr ago', read: false },
+  { title: 'AI Center detected rising demand for interview prep', category: 'Insight', time: 'Today', read: true },
+];
+
 export default function NotificationsPage() {
-  const notifications = [
-    { type: 'help_offered', title: '@sarah_dev offered to help you!', time: '10m ago', unread: true },
-    { type: 'ai_insight', title: 'AI matched your skills with a new "Critical" request.', time: '2h ago', unread: true },
-    { type: 'resolved', title: 'Your request "Figma Prototype" was marked as solved.', time: '1d ago', unread: false },
-    { type: 'badge', title: 'You earned the "Helpful Hand" badge!', time: '2d ago', unread: false },
-  ];
-
   return (
-    <div className="min-h-screen bg-[#0a0a0f] px-6 py-10">
-      <div className="max-w-2xl mx-auto">
-        <Link href="/dashboard" className="text-white/40 hover:text-white text-sm transition-colors block mb-6">← Dashboard</Link>
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-white">Notifications</h1>
-          <button className="text-xs text-violet-400 hover:text-white transition-colors">Mark all as read</button>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #e8f5f0 0%, #f5f0e8 40%, #f0e8f5 70%, #e8f0f5 100%)' }}>
+      {/* Navbar */}
+      <nav style={{ background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }} className="sticky top-0 z-50">
+        <div className="max-w-[1300px] mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold text-base">H</div>
+            <span className="font-bold text-[#18181b] text-base">HelpHub AI</span>
+          </div>
+          <div className="flex items-center gap-8">
+            <Link href="/dashboard" className="text-neutral-500 text-sm font-medium hover:text-neutral-800 transition-colors">Dashboard</Link>
+            <Link href="/explore" className="text-neutral-500 text-sm font-medium hover:text-neutral-800 transition-colors">Explore</Link>
+            <Link href="/notifications" className="text-sm font-semibold px-4 py-1.5 rounded-full border border-neutral-300 bg-white text-[#18181b] hover:bg-neutral-50 transition-colors">Notifications</Link>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-[1300px] mx-auto px-6 py-10 pb-24">
+        {/* Hero Dark Banner */}
+        <div className="rounded-[1.5rem] p-10 mb-10" style={{ background: '#1c2b27' }}>
+          <p className="text-teal-400 text-[10px] font-bold tracking-[0.2em] uppercase mb-4">NOTIFICATIONS</p>
+          <h1 className="text-white text-4xl lg:text-5xl font-bold leading-tight max-w-3xl">
+            Stay updated on requests, helpers, and trust signals.
+          </h1>
         </div>
 
-        <div className="space-y-3">
-          {notifications.map((n, i) => (
-             <div key={i} className={`p-4 rounded-xl border flex items-center gap-4 transition-colors hover:bg-white/[0.03] ${n.unread ? 'bg-white/[0.02] border-white/10' : 'border-transparent'}`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                  n.type === 'help_offered' ? 'bg-cyan-500/20 text-cyan-400' :
-                  n.type === 'ai_insight' ? 'bg-violet-500/20 text-violet-400' :
-                  n.type === 'badge' ? 'bg-yellow-500/20 text-yellow-400' :
-                  'bg-emerald-500/20 text-emerald-400'
-                }`}>
-                  {n.type === 'help_offered' ? '🤝' : n.type === 'ai_insight' ? '✦' : n.type === 'badge' ? '🏆' : '✓'}
+        {/* Notification feed */}
+        <div className="bg-white rounded-[1.5rem] p-8 shadow-sm border border-black/5">
+          <p className="text-teal-600 text-[10px] font-bold tracking-[0.18em] uppercase mb-2">LIVE UPDATES</p>
+          <h2 className="text-[#18181b] text-2xl font-bold mb-6">Notification feed</h2>
+
+          <div className="divide-y divide-neutral-100">
+            {notifications.map((n, i) => (
+              <div key={i} className="py-5 flex items-start justify-between gap-6 hover:bg-neutral-50 -mx-2 px-2 transition-colors cursor-pointer">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[#18181b] text-sm mb-1 leading-relaxed">{n.title}</p>
+                  <p className="text-neutral-400 text-xs">{n.category} • {n.time}</p>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-sm ${n.unread ? 'text-white font-medium' : 'text-white/60'}`}>{n.title}</p>
-                </div>
-                <div className="text-xs text-white/30 shrink-0">{n.time}</div>
-                {n.unread && <div className="w-2 h-2 rounded-full bg-violet-500 shrink-0"></div>}
-             </div>
-          ))}
+                <span
+                  className="shrink-0 text-xs font-semibold mt-0.5"
+                  style={{ color: n.read ? '#a1a1aa' : '#18181b' }}
+                >
+                  {n.read ? 'Read' : 'Unread'}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
