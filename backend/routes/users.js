@@ -31,14 +31,22 @@ router.get('/leaderboard', auth, async (req, res) => {
 // Update user profile
 router.put('/me', auth, async (req, res) => {
   try {
-      // e.g., Onboarding updates: supportRole, or some other profile details
-      const { supportRole } = req.body;
+      const { supportRole, username, skills, interests, location } = req.body;
+      const update = {};
+      if (supportRole && ['Need Help', 'Can Help', 'Both'].includes(supportRole)) {
+          update.supportRole = supportRole;
+      }
+      if (username) update.username = username;
+      if (skills)    update.skills = skills;
+      if (interests) update.interests = interests;
+      if (location)  update.location = location;
+
       const user = await User.findByIdAndUpdate(
           req.user,
-          { supportRole },
+          { $set: update },
           { new: true }
       ).select('-password');
-      
+
       if (!user) return res.status(404).json({ error: 'User not found' });
       res.json(user);
   } catch (err) {

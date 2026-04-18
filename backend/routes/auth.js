@@ -7,51 +7,31 @@ const router = express.Router();
 
 // Register
 router.post("/register", async (req, res) => {
-  console.log("=== REGISTRATION START ===");
-  console.log("Registration attempt:", { ...req.body, password: "****" });
   try {
     const { username, email, password } = req.body;
 
-    // Basic validation
     if (!username || !email || !password) {
-      return res
-        .status(400)
-        .json({ error: "All fields (username, email, password) are required" });
+      return res.status(400).json({ error: "All fields (username, email, password) are required" });
     }
 
     if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ error: "Password must be at least 6 characters long" });
+      return res.status(400).json({ error: "Password must be at least 6 characters long" });
     }
 
-    let user = await User.findOne({ 
-      $or: [{ email }, { username }] 
-    });
-    
+    let user = await User.findOne({ $or: [{ email }, { username }] });
+
     if (user) {
       if (user.email === email) {
-        console.log("Registration failed: Email already exists", email);
         return res.status(409).json({ error: "Email already exists" });
       }
-      if (user.username === username) {
-        console.log("Registration failed: Username already exists", username);
-        return res.status(409).json({ error: "Username already exists" });
-      }
+      return res.status(409).json({ error: "Username already exists" });
     }
 
-    console.log("Creating new user...");
     user = new User({ username, email, password });
-    console.log("User object created:", { username, email, password: "****" });
-    console.log("Saving user to database...");
     await user.save();
-    console.log("User saved successfully, ID:", user._id);
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    console.log("Registration successful:", email);
-    console.log("=== REGISTRATION END ===");
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
     res.status(201).json({
       token,
       user: {
@@ -63,18 +43,13 @@ router.post("/register", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("=== REGISTRATION ERROR ===");
-    console.error("Registration error:", err);
-    console.log("=== REGISTRATION END ===");
-    res
-      .status(500)
-      .json({ error: "Internal server error during registration" });
+    console.error("Registration error:", err.message);
+    res.status(500).json({ error: "Internal server error during registration" });
   }
 });
 
 // Login
 router.post("/login", async (req, res) => {
-  console.log("Login attempt:", { email: req.body.email });
   try {
     const { email, password } = req.body;
 
@@ -84,20 +59,16 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      console.log("Login failed: Invalid credentials", email);
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      console.log("Login failed: Password mismatch", email);
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    console.log("Login successful:", email);
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
     res.json({
       token,
       user: {
@@ -109,7 +80,7 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Login error:", err);
+    console.error("Login error:", err.message);
     res.status(500).json({ error: "Internal server error during login" });
   }
 });
@@ -129,13 +100,12 @@ router.get("/me", auth, async (req, res) => {
         email: user.email,
         supportRole: user.supportRole,
         engagementMetrics: user.engagementMetrics,
+        createdAt: user.createdAt,
       },
     });
   } catch (err) {
-    console.error("Fetch profile error:", err);
-    res
-      .status(500)
-      .json({ error: "Internal server error while fetching profile" });
+    console.error("Fetch profile error:", err.message);
+    res.status(500).json({ error: "Internal server error while fetching profile" });
   }
 });
 
@@ -143,10 +113,7 @@ router.get("/me", auth, async (req, res) => {
 router.put("/profile", auth, async (req, res) => {
   try {
     const { supportRole } = req.body;
-    if (
-      !supportRole ||
-      !["Need Help", "Can Help", "Both"].includes(supportRole)
-    ) {
+    if (!supportRole || !["Need Help", "Can Help", "Both"].includes(supportRole)) {
       return res.status(400).json({ error: "Invalid supportRole value" });
     }
 
@@ -168,10 +135,8 @@ router.put("/profile", auth, async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Update profile error:", err);
-    res
-      .status(500)
-      .json({ error: "Internal server error while updating profile" });
+    console.error("Update profile error:", err.message);
+    res.status(500).json({ error: "Internal server error while updating profile" });
   }
 });
 

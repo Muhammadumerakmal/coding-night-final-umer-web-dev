@@ -40,32 +40,19 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash password before saving
-userSchema.pre("save", async function () {
-  console.log("Pre-save hook triggered for user:", this.username);
-  if (!this.isModified("password")) {
-    console.log("Password not modified, skipping hash");
-    return;
-  }
-  console.log("Hashing password...");
-
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    console.log("Password hashed successfully");
   } catch (error) {
-    console.error("Error hashing password:", error);
     throw error;
   }
 });
 
 // Method to compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  try {
-    return await bcrypt.compare(candidatePassword, this.password);
-  } catch (error) {
-    console.error("Error comparing password:", error);
-    return false;
-  }
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = mongoose.model("User", userSchema);

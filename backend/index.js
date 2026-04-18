@@ -29,15 +29,33 @@ if (!JWT_SECRET && process.env.NODE_ENV !== 'production') {
   // process.exit(1); // Don't exit immediately, let the check below handle it
 }
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Middleware — allow frontend origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://coding-night-final-umer.vercel.app',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
-// Request logging middleware
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile/curl) or known origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+app.use(express.json({ limit: '1mb' }));
+
+// Request logging middleware (dev only)
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+  });
+}
 
 // MongoDB Connection
 const MONGODB_URL = process.env.MONGODB_URL;
@@ -48,13 +66,18 @@ if (!MONGODB_URL) {
 }
 
 if (MONGODB_URL) {
-  // Log connection attempt (hiding password)
   const maskedUrl = MONGODB_URL.replace(/:([^:@]{1,})@/, ':****@');
-  console.log(`Attempting to connect to: ${maskedUrl}`);
+  console.log(`Connecting to MongoDB: ${maskedUrl}`);
 
-  mongoose.connect(MONGODB_URL)
+  mongoose.connect(MONGODB_URL, {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  })
     .then(() => console.log('Connected to MongoDB'))
-    .catch((err) => console.error('MongoDB connection error:', err));
+    .catch((err) => {
+      console.error('MongoDB connection error:', err.message);
+      // Don't crash immediately — let health check handle it
+    });
 }
 
 app.get('/', (req, res) => {
@@ -74,6 +97,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    mongoose.connection.close();
+    process.exit(0);
+  });
 });

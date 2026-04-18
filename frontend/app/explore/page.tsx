@@ -159,7 +159,7 @@ export default function ExplorePage() {
                   placeholder="React, Figma, Git/GitHub"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 rounded-[1rem] px-5 py-10 pb-4 text-sm text-[#18181b] outline-none transition-colors shadow-sm"
+                  className="w-full bg-white border border-neutral-200 rounded-[1rem] px-5 py-3 text-sm text-[#18181b] outline-none transition-colors shadow-sm"
                 />
               </div>
 
@@ -169,7 +169,7 @@ export default function ExplorePage() {
                 <input
                   type="text"
                   placeholder="Karachi, Lahore, Remote"
-                  className="w-full bg-white border border-neutral-200 rounded-[1rem] px-5 py-10 pb-4 text-sm text-[#18181b] outline-none transition-colors shadow-sm"
+                  className="w-full bg-white border border-neutral-200 rounded-[1rem] px-5 py-3 text-sm text-[#18181b] outline-none transition-colors shadow-sm"
                 />
               </div>
             </div>

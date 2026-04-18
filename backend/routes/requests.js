@@ -161,14 +161,18 @@ router.post('/:id/solve', auth, async (req, res) => {
     request.completedAt = new Date();
     await request.save();
 
-    // Update Helper's trust score/contributions
+    // Update Helper's trust score (capped at 100) and contributions
     if (request.helper) {
-      await User.findByIdAndUpdate(request.helper, {
-        $inc: { 
-          'engagementMetrics.contributions': 1,
-          'engagementMetrics.trustScore': 10 
+      await User.findByIdAndUpdate(request.helper, [
+        {
+          $set: {
+            'engagementMetrics.contributions': { $add: ['$engagementMetrics.contributions', 1] },
+            'engagementMetrics.trustScore': {
+              $min: [{ $add: ['$engagementMetrics.trustScore', 10] }, 100]
+            }
+          }
         }
-      });
+      ]);
     }
 
     res.json(request);
