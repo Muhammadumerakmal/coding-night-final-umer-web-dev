@@ -15,6 +15,17 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+console.log('Environment variables check:');
+console.log(`- PORT: ${PORT}`);
+console.log(`- JWT_SECRET: ${JWT_SECRET ? 'Defined' : 'UNDEFINED'}`);
+console.log(`- MONGODB_URL: ${process.env.MONGODB_URL ? 'Defined' : 'UNDEFINED'}`);
+
+if (!JWT_SECRET) {
+  console.error('Error: JWT_SECRET is not defined in .env file');
+  process.exit(1);
+}
 
 // Middleware
 app.use(cors());
