@@ -6,7 +6,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import authRoutes from './routes/auth.js';
-import itemRoutes from './routes/items.js';
+import requestRoutes from './routes/requests.js';
+import userRoutes from './routes/users.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,7 +63,8 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/items', itemRoutes);
+app.use('/api/requests', requestRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -1,7 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/AuthContext';
+import api from '@/lib/api';
+
+const statusColors: Record<string, string> = {
+  'Open': 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30',
+  'In Progress': 'bg-violet-500/20 text-violet-400 border border-violet-500/30',
+  'Completed': 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+  'Closed': 'bg-white/10 text-white/40 border border-white/20',
+};
 
 const urgencyBadge: Record<string, string> = {
   Low: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
@@ -10,85 +19,184 @@ const urgencyBadge: Record<string, string> = {
   Critical: 'bg-red-500/15 text-red-400 border border-red-500/30',
 };
 
-// Mock detail data — replace with real API call
-const mockDetail = {
-  _id: '1',
-  title: 'Need help debugging my Next.js auth flow',
-  description: `I have a Next.js 14 app with JWT-based authentication. After the access token expires, the refresh token logic doesn't seem to be firing correctly — the user gets a 401 and is immediately logged out instead of silently refreshing.\n\nI've verified the refresh token is stored in an httpOnly cookie and that the endpoint is configured correctly in the backend. The problem seems to be on the client-side interceptor.\n\nAny help from someone experienced with Next.js middleware and Axios interceptors would be greatly appreciated.`,
-  category: 'Technology',
-  urgencyLevel: 'High',
-  status: 'Open',
-  aiMetadata: {
-    tags: ['next.js', 'authentication', 'jwt', 'axios', 'middleware'],
-    insights: 'This is a common issue with silent token refresh strategies. Consider using an Axios request interceptor combined with a queue mechanism to pause inflight requests during token refresh.',
-    autoCategory: 'Technology',
-    autoUrgency: 'High',
-  },
-  requester: { username: 'sarah_dev' },
-  createdAt: '2026-04-15T10:00:00Z',
-};
-
 export default function RequestDetailPage() {
+  const { id } = useParams();
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  
+  const [request, setRequest] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const fetchRequest = useCallback(async () => {
+    try {
+      const { data } = await api.get(`/requests/${id}`);
+      setRequest(data);
+    } catch (err) {
+      console.error(err);
+      router.push('/dashboard');
+    } finally {
+      setLoading(false);
+    }
+  }, [id, router]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) router.push('/auth');
-  }, [router]);
+    if (!authLoading) {
+      fetchRequest();
+    }
+  }, [authLoading, fetchRequest]);
 
-  const req = mockDetail;
+  const handleOfferHelp = async () => {
+    setActionLoading(true);
+    try {
+      const { data } = await api.post(`/requests/${id}/offer-help`);
+      setRequest(prev => ({ ...prev, status: data.status, helper: { username: user?.username } }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleMarkSolved = async () => {
+    setActionLoading(true);
+    try {
+      const { data } = await api.post(`/requests/${id}/solve`);
+      setRequest(prev => ({ ...prev, status: data.status }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (loading || authLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-500"></div>
+      </div>
+    );
+  }
+
+  if (!request) return null;
+
+  const isOwner = user?.id === request.requester?._id;
+  const isHelper = user?.username === request.helper?.username;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] px-6 py-10">
-      <div className="max-w-3xl mx-auto">
-        <a href="/explore" className="text-white/40 hover:text-white text-sm transition-colors mb-6 inline-block">← Back to Explore</a>
+    <div className="min-h-screen bg-[#0a0a0f] px-6 py-10 flex justify-center">
+      <div className="w-full max-w-3xl">
+        <a href="/explore" className="text-white/40 hover:text-white text-sm transition-colors block mb-6">← Back to Explore</a>
 
-        {/* Header */}
-        <div className="rounded-2xl bg-white/[0.03] border border-white/8 p-7 mb-4">
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className="text-xs px-2.5 py-1 rounded-full bg-white/5 text-white/40">{req.category}</span>
-            <span className={`text-xs px-2.5 py-1 rounded-full ${urgencyBadge[req.urgencyLevel]}`}>{req.urgencyLevel}</span>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-cyan-500/15 text-cyan-400">{req.status}</span>
-          </div>
-          <h1 className="text-2xl font-bold text-white mb-3">{req.title}</h1>
-          <p className="text-white/30 text-xs mb-5">Posted by @{req.requester.username} · {new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-          <p className="text-white/70 text-sm leading-7 whitespace-pre-line">{req.description}</p>
-        </div>
-
-        {/* AI Metadata */}
-        <div className="rounded-2xl bg-gradient-to-br from-violet-500/5 to-cyan-500/5 border border-violet-500/20 p-6 mb-4">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-violet-400 text-lg">✦</span>
-            <h2 className="text-sm font-semibold text-violet-300">AI Insights</h2>
-          </div>
-          <p className="text-white/60 text-sm leading-relaxed mb-4">{req.aiMetadata.insights}</p>
-          <div>
-            <p className="text-xs text-white/30 mb-2">Auto-generated tags</p>
-            <div className="flex flex-wrap gap-2">
-              {req.aiMetadata.tags.map(tag => (
-                <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20">
-                  #{tag}
-                </span>
-              ))}
+        <div className="rounded-3xl bg-white/[0.02] border border-white/5 overflow-hidden">
+          {/* Header */}
+          <div className="p-8 border-b border-white/5">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[request.status]}`}>
+                {request.status}
+              </span>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${urgencyBadge[request.urgencyLevel]}`}>
+                {request.urgencyLevel}
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/5 text-white/50 border border-white/10">
+                {request.category}
+              </span>
+            </div>
+            
+            <h1 className="text-3xl font-bold text-white mb-4 leading-tight">{request.title}</h1>
+            
+            <div className="flex items-center gap-3 text-sm text-white/40">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold">
+                  {request.requester?.username?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-white/80 font-medium">@{request.requester?.username}</p>
+                  <p className="text-xs">Requester</p>
+                </div>
+              </div>
+              <span className="mx-2">•</span>
+              <span>{new Date(request.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex gap-3">
-          <button
-            id="offer-help-btn"
-            className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
-          >
-            🤝 Offer Help
-          </button>
-          <a
-            href="/messages"
-            id="message-requester-btn"
-            className="flex-1 py-3.5 rounded-xl border border-white/10 text-white/70 font-semibold text-sm hover:bg-white/5 hover:text-white transition-all text-center"
-          >
-            💬 Message Requester
-          </a>
+          {/* Body */}
+          <div className="p-8 space-y-8">
+            <div>
+              <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-3">Description</h3>
+              <p className="text-white whitespace-pre-wrap leading-relaxed">{request.description}</p>
+            </div>
+
+            {/* AI Summary / Insights */}
+            {request.aiMetadata?.insights && (
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-violet-500/10 to-transparent border-l-2 border-violet-500">
+                <h3 className="text-sm font-bold text-violet-300 flex items-center gap-2 mb-2">
+                  <span>✦</span> AI Insight
+                </h3>
+                <p className="text-white/80 text-sm leading-relaxed">{request.aiMetadata.insights}</p>
+              </div>
+            )}
+
+            {/* Tags */}
+            {request.aiMetadata?.tags?.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {request.aiMetadata.tags.map((tag: string) => (
+                    <span key={tag} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white/70">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Helper Status */}
+            {request.helper && (
+              <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl">
+                  🤝
+                </div>
+                <div>
+                  <p className="text-white/40 text-sm mb-0.5">Help is being provided by</p>
+                  <p className="text-white font-medium">@{request.helper.username}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Actions Footer */}
+          <div className="p-6 border-t border-white/5 bg-white/[0.01] flex items-center justify-between">
+            <div>
+              {request.status === 'Completed' && (
+                <p className="text-emerald-400 text-sm font-medium flex items-center gap-2">
+                  <span>✓</span> Request has been marked as solved
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              {request.status === 'Open' && !isOwner && (
+                <button
+                  onClick={handleOfferHelp}
+                  disabled={actionLoading}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 text-white font-semibold disabled:opacity-50"
+                >
+                  {actionLoading ? 'Processing...' : 'I Can Help'}
+                </button>
+              )}
+
+              {['In Progress', 'Open'].includes(request.status) && isOwner && (
+                <button
+                  onClick={handleMarkSolved}
+                  disabled={actionLoading}
+                  className="px-6 py-3 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold hover:bg-emerald-500/30 disabled:opacity-50 transition-colors"
+                >
+                  {actionLoading ? 'Processing...' : 'Mark as Solved'}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

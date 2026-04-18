@@ -45,7 +45,7 @@ export default function Dashboard() {
 
   const fetchRequests = useCallback(async () => {
     try {
-      const { data } = await api.get("items");
+      const { data } = await api.get("requests");
       setRequests(data);
     } catch (err) {
       console.error("Failed to fetch requests", err);
