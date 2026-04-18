@@ -50,7 +50,7 @@ export default function RequestDetailPage() {
     setActionLoading(true);
     try {
       const { data } = await api.post(`/requests/${id}/offer-help`);
-      setRequest(prev => ({ ...prev, status: data.status, helper: { username: user?.username } }));
+      setRequest((prev: any) => ({ ...prev, status: data.status, helper: { username: user?.username } }));
     } catch (err) {
       console.error(err);
     } finally {
@@ -62,7 +62,7 @@ export default function RequestDetailPage() {
     setActionLoading(true);
     try {
       const { data } = await api.post(`/requests/${id}/solve`);
-      setRequest(prev => ({ ...prev, status: data.status }));
+      setRequest((prev: any) => ({ ...prev, status: data.status }));
     } catch (err) {
       console.error(err);
     } finally {

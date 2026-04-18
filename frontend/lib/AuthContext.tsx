@@ -14,6 +14,7 @@ interface User {
     trustScore: number;
     badges: string[];
   };
+  createdAt?: string;
 }
 
 interface AuthContextType {

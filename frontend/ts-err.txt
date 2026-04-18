@@ -1,0 +1,4 @@
+app/requests/[id]/page.tsx(53,18): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+app/requests/[id]/page.tsx(65,18): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+app/requests/create/page.tsx(33,11): error TS7034: Variable 'tags' implicitly has type 'any[]' in some locations where its type cannot be determined.
+app/requests/create/page.tsx(52,26): error TS7005: Variable 'tags' implicitly has an 'any[]' type.

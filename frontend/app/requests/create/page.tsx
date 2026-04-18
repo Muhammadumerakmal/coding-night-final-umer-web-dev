@@ -30,7 +30,7 @@ export default function CreateRequestPage() {
     setIsAiLoading(true);
     setTimeout(() => {
       const text = (formData.title + ' ' + formData.description).toLowerCase();
-      let tags = [];
+      let tags: string[] = [];
       let cat = formData.category;
 
       if (text.includes('react') || text.includes('next.js')) {

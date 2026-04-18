@@ -1,0 +1,23 @@
+
+> frontend@0.1.0 build
+> next build
+
+▲ Next.js 16.2.4 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 19.1s
+  Running TypeScript ...
+Failed to type check.
+
+./app/profile/page.tsx:52:46
+Type error: 'user.engagementMetrics.badges.length' is possibly 'undefined'.
+
+  [90m50 |[0m ...          <div className=[32m"text-center p-4 bg-white/[0.02] rounded-2xl border border-whi...[0m
+  [90m51 |[0m ...            <div className=[32m"text-sm text-white/40 mb-1"[0m>[33mBadges[0m</div>
+[31m[1m>[0m [90m52 |[0m ...            <div className=[32m"text-xl mt-2"[0m>{user?.engagementMetrics?.badges?.length > [35m0[0m ...
+  [90m   |[0m                                               [31m[1m^[0m
+  [90m53 |[0m ...          </div>
+  [90m54 |[0m ...        </div>
+  [90m55 |[0m ...      </div>
+Next.js build worker exited with code: 1 and signal: null

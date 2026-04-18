@@ -49,7 +49,7 @@ export default function ProfilePage() {
             </div>
             <div className="text-center p-4 bg-white/[0.02] rounded-2xl border border-white/5">
               <div className="text-sm text-white/40 mb-1">Badges</div>
-              <div className="text-xl mt-2">{user?.engagementMetrics?.badges?.length > 0 ? user.engagementMetrics.badges.join(' ') : '🌱'}</div>
+              <div className="text-xl mt-2">{(user?.engagementMetrics?.badges?.length ?? 0) > 0 ? user?.engagementMetrics?.badges?.join(' ') : '🌱'}</div>
             </div>
           </div>
         </div>
