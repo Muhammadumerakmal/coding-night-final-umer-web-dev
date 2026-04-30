@@ -2,11 +2,12 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import auth from "../middleware/auth.js";
+import { validateRegistration, validateLogin, sanitizeInput } from "../middleware/validation.js";
 
 const router = express.Router();
 
 // Register
-router.post("/register", async (req, res) => {
+router.post("/register", sanitizeInput, validateRegistration, async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
@@ -49,7 +50,7 @@ router.post("/register", async (req, res) => {
 });
 
 // Login
-router.post("/login", async (req, res) => {
+router.post("/login", sanitizeInput, validateLogin, async (req, res) => {
   try {
     const { email, password } = req.body;
 
