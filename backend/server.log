@@ -1,0 +1,12 @@
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+◇ injected env (4) from ..\.env // tip: ◈ secrets for agents [www.dotenvx.com]
+Environment variables check:
+- PORT: 5000
+- JWT_SECRET: Defined
+- MONGODB_URL: Defined
+Connecting to MongoDB: mongodb://umerroot:****@127.0.0.1:27018/smit_final_db?authSource=admin
+Server running on port 5000
+Connected to MongoDB
+GET /health
+POST /api/auth/register
+POST /api/auth/register
