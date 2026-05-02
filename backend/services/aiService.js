@@ -1,8 +1,21 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai = null;
+
+// Lazy initialization of OpenAI client
+function getOpenAIClient() {
+  if (!openai && process.env.OPENAI_API_KEY) {
+    try {
+      openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+    } catch (error) {
+      console.warn('OpenAI initialization failed:', error.message);
+      return null;
+    }
+  }
+  return openai;
+}
 
 /**
  * Analyze sentiment of help request using OpenAI
@@ -11,6 +24,11 @@ const openai = new OpenAI({
  * @returns {Promise<{sentiment: string, sentimentScore: number}>}
  */
 export async function analyzeSentiment(title, description) {
+  const client = getOpenAIClient();
+  if (!client) {
+    return fallbackSentimentAnalysis(title, description);
+  }
+
   try {
     const prompt = `Analyze the sentiment of this help request and classify it as one of: Positive, Neutral, Negative, or Urgent.
 Also provide a sentiment score between -1 (very negative) and 1 (very positive).
@@ -25,7 +43,7 @@ Respond in JSON format:
   "reasoning": "<brief explanation>"
 }`;
 
-    const response = await openai.chat.completions.create({
+    const response = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -60,6 +78,11 @@ Respond in JSON format:
  * @returns {Promise<string>}
  */
 export async function suggestCategory(title, description) {
+  const client = getOpenAIClient();
+  if (!client) {
+    return fallbackCategoryAnalysis(title, description);
+  }
+
   try {
     const prompt = `Categorize this help request into one of these categories:
 - Technical Support
@@ -78,7 +101,7 @@ Respond in JSON format:
   "reasoning": "<brief explanation>"
 }`;
 
-    const response = await openai.chat.completions.create({
+    const response = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -110,6 +133,11 @@ Respond in JSON format:
  * @returns {Promise<string>}
  */
 export async function suggestPriority(title, description, sentiment) {
+  const client = getOpenAIClient();
+  if (!client) {
+    return fallbackPriorityAnalysis(title, description, sentiment);
+  }
+
   try {
     const prompt = `Determine the urgency level of this help request. Choose one: Low, Medium, High, or Critical.
 
@@ -123,7 +151,7 @@ Respond in JSON format:
   "reasoning": "<brief explanation>"
 }`;
 
-    const response = await openai.chat.completions.create({
+    const response = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -155,6 +183,11 @@ Respond in JSON format:
  * @returns {Promise<string[]>}
  */
 export async function generateTags(title, description, category) {
+  const client = getOpenAIClient();
+  if (!client) {
+    return fallbackTagGeneration(title, description, category);
+  }
+
   try {
     const prompt = `Generate 3-6 relevant tags for this help request. Tags should be lowercase, single words or short phrases.
 
@@ -167,7 +200,7 @@ Respond in JSON format:
   "tags": ["tag1", "tag2", "tag3", ...]
 }`;
 
-    const response = await openai.chat.completions.create({
+    const response = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -200,6 +233,11 @@ Respond in JSON format:
  * @returns {Promise<string>}
  */
 export async function generateSuggestedResponse(title, description, category, sentiment) {
+  const client = getOpenAIClient();
+  if (!client) {
+    return fallbackResponseGeneration(title, description, category, sentiment);
+  }
+
   try {
     const prompt = `Generate a helpful, empathetic response template for a helper to use when responding to this help request.
 
@@ -220,7 +258,7 @@ Respond in JSON format:
   "response": "<suggested response text>"
 }`;
 
-    const response = await openai.chat.completions.create({
+    const response = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -253,6 +291,11 @@ Respond in JSON format:
  * @returns {Promise<string>}
  */
 export async function generateInsights(title, description, category, sentiment) {
+  const client = getOpenAIClient();
+  if (!client) {
+    return fallbackInsightGeneration(category, sentiment);
+  }
+
   try {
     const prompt = `Provide a brief insight or summary about this help request for the community platform.
 
@@ -268,7 +311,7 @@ Respond in JSON format:
   "insight": "<insight text>"
 }`;
 
-    const response = await openai.chat.completions.create({
+    const response = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {

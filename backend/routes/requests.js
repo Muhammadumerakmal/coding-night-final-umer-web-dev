@@ -199,12 +199,13 @@ router.get('/:id/ai-suggestions', auth, async (req, res) => {
     const request = await HelpRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ message: 'Request not found' });
 
-    // Re-analyze or return existing AI metadata
-    const { sentiment, sentimentScore } = analyzeSentiment(request.title, request.description);
-    const suggestedCategory = suggestCategory(request.title, request.description);
-    const suggestedPriority = suggestPriority(request.title, request.description, sentiment);
-    const tags = generateTags(request.title, request.description, request.category);
-    const suggestedResponse = generateSuggestedResponse(request.title, request.description, request.category, sentiment);
+    // Re-analyze using AI service
+    const { sentiment, sentimentScore } = await aiService.analyzeSentiment(request.title, request.description);
+    const suggestedCategory = await aiService.suggestCategory(request.title, request.description);
+    const suggestedPriority = await aiService.suggestPriority(request.title, request.description, sentiment);
+    const tags = await aiService.generateTags(request.title, request.description, request.category);
+    const suggestedResponse = await aiService.generateSuggestedResponse(request.title, request.description, request.category, sentiment);
+    const insights = await aiService.generateInsights(request.title, request.description, request.category, sentiment);
 
     res.json({
       sentiment,
@@ -213,9 +214,10 @@ router.get('/:id/ai-suggestions', auth, async (req, res) => {
       suggestedPriority,
       tags,
       suggestedResponse,
-      insights: request.aiMetadata.insights
+      insights
     });
   } catch (err) {
+    console.error('Error getting AI suggestions:', err);
     res.status(500).json({ message: err.message });
   }
 });
