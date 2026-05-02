@@ -3,6 +3,7 @@ import HelpRequest from '../models/HelpRequest.js';
 import User from '../models/User.js';
 import auth from '../middleware/auth.js';
 import { validateHelpRequest, validateUpdateRequest, sanitizeInput } from '../middleware/validation.js';
+import * as aiService from '../services/aiService.js';
 
 const router = express.Router();
 
@@ -69,158 +70,30 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-// AI Helper Functions
-function analyzeSentiment(title, description) {
-  const text = (title + ' ' + description).toLowerCase();
-
-  // Negative sentiment indicators
-  const negativeWords = ['urgent', 'critical', 'broken', 'error', 'crash', 'fail', 'bug', 'issue', 'problem', 'help', 'stuck', 'frustrated', 'not working', 'please help'];
-  const urgentWords = ['asap', 'immediately', 'urgent', 'critical', 'emergency', 'now'];
-  const positiveWords = ['thanks', 'appreciate', 'great', 'awesome', 'working', 'solved'];
-
-  let score = 0;
-  let sentiment = 'Neutral';
-
-  // Count sentiment indicators
-  negativeWords.forEach(word => {
-    if (text.includes(word)) score -= 0.1;
-  });
-
-  urgentWords.forEach(word => {
-    if (text.includes(word)) {
-      score -= 0.2;
-      sentiment = 'Urgent';
-    }
-  });
-
-  positiveWords.forEach(word => {
-    if (text.includes(word)) score += 0.1;
-  });
-
-  // Determine sentiment
-  if (sentiment !== 'Urgent') {
-    if (score < -0.3) sentiment = 'Negative';
-    else if (score > 0.1) sentiment = 'Positive';
-    else sentiment = 'Neutral';
-  }
-
-  return { sentiment, sentimentScore: Math.max(-1, Math.min(1, score)) };
-}
-
-function suggestCategory(title, description) {
-  const text = (title + ' ' + description).toLowerCase();
-
-  const categoryKeywords = {
-    'Technical Support': ['bug', 'error', 'crash', 'not working', 'broken', 'issue', 'problem'],
-    'Development': ['code', 'function', 'api', 'database', 'backend', 'frontend', 'react', 'node'],
-    'Design': ['ui', 'ux', 'design', 'layout', 'css', 'style', 'interface'],
-    'Documentation': ['docs', 'documentation', 'guide', 'tutorial', 'readme'],
-    'General': []
-  };
-
-  let bestMatch = 'General';
-  let maxMatches = 0;
-
-  for (const [category, keywords] of Object.entries(categoryKeywords)) {
-    const matches = keywords.filter(keyword => text.includes(keyword)).length;
-    if (matches > maxMatches) {
-      maxMatches = matches;
-      bestMatch = category;
-    }
-  }
-
-  return bestMatch;
-}
-
-function suggestPriority(title, description, sentiment) {
-  const text = (title + ' ' + description).toLowerCase();
-
-  const criticalWords = ['critical', 'emergency', 'production', 'down', 'crash', 'data loss'];
-  const highWords = ['urgent', 'asap', 'immediately', 'broken', 'not working'];
-
-  if (criticalWords.some(word => text.includes(word))) return 'Critical';
-  if (highWords.some(word => text.includes(word)) || sentiment === 'Urgent') return 'High';
-  if (sentiment === 'Negative') return 'Medium';
-
-  return 'Low';
-}
-
-function generateTags(title, description, category) {
-  const text = (title + ' ' + description).toLowerCase();
-  const tags = [category.toLowerCase()];
-
-  const techTags = {
-    'react': ['react', 'jsx', 'component'],
-    'node': ['node', 'nodejs', 'express'],
-    'database': ['database', 'sql', 'mongodb', 'postgres'],
-    'api': ['api', 'rest', 'endpoint'],
-    'frontend': ['frontend', 'ui', 'css', 'html'],
-    'backend': ['backend', 'server'],
-    'debugging': ['bug', 'error', 'debug', 'issue'],
-    'performance': ['slow', 'performance', 'optimization'],
-    'security': ['security', 'auth', 'authentication', 'authorization']
-  };
-
-  for (const [tag, keywords] of Object.entries(techTags)) {
-    if (keywords.some(keyword => text.includes(keyword))) {
-      tags.push(tag);
-    }
-  }
-
-  return [...new Set(tags)];
-}
-
-function generateSuggestedResponse(title, description, category, sentiment) {
-  let response = `Thank you for reaching out! `;
-
-  if (sentiment === 'Urgent' || sentiment === 'Negative') {
-    response += `I understand this is causing frustration. `;
-  }
-
-  response += `I'd be happy to help with your ${category.toLowerCase()} issue. `;
-
-  const text = (title + ' ' + description).toLowerCase();
-
-  if (text.includes('error') || text.includes('bug')) {
-    response += `Could you please share:\n- The exact error message you're seeing\n- Steps to reproduce the issue\n- Your environment (browser/OS/versions)\n\nThis will help me diagnose the problem quickly.`;
-  } else if (text.includes('how to') || text.includes('how do')) {
-    response += `I can guide you through this. Let me know if you need step-by-step instructions or code examples.`;
-  } else {
-    response += `Could you provide more details about what you're trying to accomplish? This will help me give you the best solution.`;
-  }
-
-  return response;
-}
+// AI functions are now in services/aiService.js
 
 // Create a request
 router.post('/', auth, sanitizeInput, validateHelpRequest, async (req, res) => {
   try {
     const { title, description, category, urgencyLevel, aiSuggestedTags } = req.body;
 
-    // AI Sentiment Analysis
-    const { sentiment, sentimentScore } = analyzeSentiment(title, description);
+    // AI Sentiment Analysis (using OpenAI)
+    const { sentiment, sentimentScore } = await aiService.analyzeSentiment(title, description);
 
     // AI Category Suggestion (if not provided or to validate)
-    const suggestedCategory = suggestCategory(title, description);
+    const suggestedCategory = await aiService.suggestCategory(title, description);
 
     // AI Priority Suggestion
-    const suggestedPriority = suggestPriority(title, description, sentiment);
+    const suggestedPriority = await aiService.suggestPriority(title, description, sentiment);
 
     // AI Tag Generation
-    let tags = aiSuggestedTags || generateTags(title, description, category || suggestedCategory);
+    let tags = aiSuggestedTags || await aiService.generateTags(title, description, category || suggestedCategory);
 
     // AI Insights
-    let insight = "Standard request.";
-    if (sentiment === 'Urgent') {
-      insight = `⚠️ Urgent request detected. User appears to need immediate assistance with ${category || suggestedCategory}.`;
-    } else if (sentiment === 'Negative') {
-      insight = `User is experiencing frustration. Quick response recommended for ${category || suggestedCategory} issue.`;
-    } else if (sentimentScore > 0) {
-      insight = `Positive tone detected. User is seeking guidance on ${category || suggestedCategory}.`;
-    }
+    const insight = await aiService.generateInsights(title, description, category || suggestedCategory, sentiment);
 
     // AI Suggested Response for helpers
-    const suggestedResponse = generateSuggestedResponse(title, description, category || suggestedCategory, sentiment);
+    const suggestedResponse = await aiService.generateSuggestedResponse(title, description, category || suggestedCategory, sentiment);
 
     const newRequest = new HelpRequest({
       title,
@@ -246,6 +119,7 @@ router.post('/', auth, sanitizeInput, validateHelpRequest, async (req, res) => {
 
     res.status(201).json(newRequest);
   } catch (err) {
+    console.error('Error creating request:', err);
     res.status(500).json({ message: err.message });
   }
 });
