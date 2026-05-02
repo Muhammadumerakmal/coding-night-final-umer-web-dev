@@ -10,3 +10,33 @@ Connected to MongoDB
 GET /health
 POST /api/auth/register
 POST /api/auth/register
+POST /api/auth/register
+GET /api/auth/me
+PUT /api/users/me
+(node:18760) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+(Use `node --trace-warnings ...` to show where the warning was created)
+GET /api/requests
+GET /api/auth/me
+GET /api/requests
+GET /api/auth/me
+GET /api/requests
+GET /api/auth/me
+GET /api/requests?
+GET /api/requests?category=Writing
+GET /api/requests
+GET /api/auth/me
+GET /api/requests
+GET /api/auth/me
+GET /api/requests
+GET /api/auth/me
+GET /api/requests
+GET /api/auth/me
+GET /api/requests
+GET /api/auth/me
+GET /api/requests
+GET /api/auth/me
+GET /api/auth/me
+POST /api/requests
+GET /api/requests
+GET /api/auth/me
+GET /api/requests
